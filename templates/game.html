@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Welcome to Hangman Game</h1>
+
+{% block content %}
+
+<div class="container">
+        <h1 class="logo">Please enter a letter!</h1>
+        <strong><nav>
+        <input type="text" name="letter" autocomplete="off" id="letter" required>
+        
+        </nav></strong>
+</div>
+<div class="container">
+        <h1 class="logo">Word to guess:</h1>
+        <strong><nav>
+        <div id="values" style="color:red"></div>
+        <div id="length" style="color:red"></div>
+        </nav></strong>
+</div>
+<div style="text-align:center;">
+	<canvas id="hangman" width="600" height="300"></canvas>
+</div>
+<div id="tries" style="color:red"></div>
+<div>your score is <div name="score" id="score" ></div></div>
+<div class="buttons">
+  <button id="reset">Reset</button>
+  <button id="home"> <a href="{{ url_for('home') }}">Home</a></button>
+</div>
+{% endblock %}
+
+
+</body>
+</html>
+
+<script>
+const canvas = document.getElementById('hangman');
+const letter = document.getElementById('letter');
+const log = document.getElementById('values');
+const log2 = document.getElementById('length');
+const log3 = document.getElementById('tries');
+const logScore = document.getElementById('score');
+const word = '{{ word }}';
+log2.textContent = "Please guess a word of " + word.length + " letters";
+var nbTry = 0;
+var score = 0;
+var dictWord = {};
+var nbLetterGuessed = 0;
+for (var i = 0; i < word.length; i++) 
+{
+    dictWord[word.charAt(i)]=0;
+    log.textContent +="X";
+}
+
+//const newLetter = '{{ lastLetter }}';
+const context = canvas.getContext("2d");
+
+
+
+
+clearCanvas = () => {
+  context.clearRect(0, 0, canvas.width, canvas.height)
+}
+
+Draw = (part) => {
+   switch (part) {
+      case 'gallows' :
+        context.strokeStyle = '#444';
+        context.lineWidth = 10; 
+        context.beginPath();
+        context.moveTo(175, 225);
+        context.lineTo(5, 225);
+        context.moveTo(40, 225);
+        context.lineTo(25, 5);
+        context.lineTo(100, 5);
+        context.lineTo(100, 25);
+        context.stroke();
+        break;
+
+      case 'head':
+        context.lineWidth = 5;
+        context.beginPath();
+        context.arc(100, 50, 25, 0, Math.PI*2, true);
+        context.closePath();
+        context.stroke();
+        break;
+      
+      case 'body':
+        context.beginPath();
+        context.moveTo(100, 75);
+        context.lineTo(100, 140);
+        context.stroke();
+        break;
+
+      case 'rightHarm':
+        context.beginPath();
+        context.moveTo(100, 85);
+        context.lineTo(60, 100);
+        context.stroke();
+        break;
+
+      case 'leftHarm':
+        context.beginPath();
+        context.moveTo(100, 85);
+        context.lineTo(140, 100);
+        context.stroke();
+        break;
+
+      case 'rightLeg':
+        context.beginPath();
+        context.moveTo(100, 140);
+        context.lineTo(80, 190);
+        context.stroke();
+        break;
+
+      case 'rightFoot':
+         context.beginPath();
+         context.moveTo(82, 190);
+         context.lineTo(70, 185);
+         context.stroke();
+      break;
+
+      case 'leftLeg':
+        context.beginPath();
+        context.moveTo(100, 140);
+        context.lineTo(125, 190);
+        context.stroke();
+      break;
+
+      case 'leftFoot':
+         context.beginPath();
+         context.moveTo(122, 190);
+         context.lineTo(135, 185);
+         context.stroke();
+      break;
+    
+      case 'failed':
+         context.clearRect(0, 0, canvas.width, canvas.height)
+         context.font = "30px Verdana";
+         context.fillText("You Failed!", 10, 50);
+       
+    
+      case 'won':
+         context.clearRect(0, 0, canvas.width, canvas.height)
+         context.font = "30px Verdana";
+         context.fillText("You guessed it!!", 10, 50);
+        
+   } 
+}
+
+const draws = [
+   'gallows', 
+   'head', 
+   'body', 
+   'rightHarm', 
+   'leftHarm',
+   'rightLeg',
+   'leftLeg',
+   'rightFoot',
+   'leftFoot',
+   'failed',
+   'won',
+]
+var step = 0;
+
+
+
+
+const input = document.querySelector('input');
+
+
+document.getElementById('letter').addEventListener('change', function(e) {
+  const newLetter = e.target.value;
+  nbTry+=1;
+  
+  e.target.value = "";
+  
+    if(word.includes(newLetter) && (/[a-zA-Z]/).test(newLetter) && newLetter != "" && dictWord[newLetter] == 0 && nbTry<10)
+    {
+        nbLetterGuessed +=1;
+        dictWord[newLetter] = 1; 
+        log2.textContent = " You guessed the right letter: " + newLetter + " is part of the word"; 
+        score +=10;
+        logScore.textContent = score;
+        UpdateDisplayWord();
+        SendToBackEnd(word, newLetter,score);
+        console.log(word.length);
+        console.log(nbLetterGuessed);
+        if(word.length == nbLetterGuessed)
+        {
+            Draw(draws[10]);
+            //return;
+        }
+    }
+    else if(nbTry>10)
+    {
+        clearCanvas();
+        log2.textContent = " You lost!"; 
+    }
+    else
+    {
+        Draw(draws[step++]);
+        log2.textContent = " Try Again!"; 
+    }
+    
+    log3.textContent = " You tried "+ nbTry + " times"; 
+
+})
+
+function UpdateDisplayWord()
+{
+    var wordToDisplay = ""
+    for (var i = 0; i < word.length; i++) 
+    {
+        if(dictWord[word.charAt(i)]==0)
+        {
+            wordToDisplay+="X";
+        }
+        else
+        {
+            wordToDisplay+=word.charAt(i);
+        }
+    }
+    log.textContent = wordToDisplay;
+
+}
+
+function SendToBackEnd(word, newLetter,score)
+{
+    const xhttp = new XMLHttpRequest();
+    //URL = "/update/";
+    URL = "{{ url_for('update') }}";
+    console.log(URL);
+    xhttp.open("POST", URL);
+    xhttp.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    //xhttp.setRequestHeader('content-type', 'application/json');
+    console.log('before send');
+    xhttp.send("word="+word+"&letter="+newLetter+"&score="+score); 
+}
+ 
+
+</script>

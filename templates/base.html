@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<h1>My Personal Website</h1>
+<p>Hi, this is my personal website.</p>
+{% block content %}
+<div class="container">
+        {% if currentUser == "" %}
+        <h1 class="logo">Please Login</h1>
+        {% else %}
+        <h1 class="logo">{{ currentUser }} is connected </h1>
+        {% endif %}
+        <strong><nav>
+          <ul class="menu">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('game') }}">Game</a></li>
+            {% if loggedin == "false" %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% else %}
+            <li><a href="{{ url_for('score') }}">See your score!</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout {{ currentUser }}</a></li>
+            {% endif %}
+          </ul>
+        </nav></strong>
+</div>
+{% endblock %}
+</body>
+</html>

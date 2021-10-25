@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<h1>My Personal Website</h1>
+<p>Hi, this is my personal website.</p>
+{% block content %}
+<div class="container">
+  
+        <h1 class="logo">{{ currentUser }} is connected </h1>
+        <strong><nav>
+        <h1 class="logo">Your score is {{ score }}!</h1> 
+        </nav></strong>
+</div>
+<div class="buttons">
+  <button id="reset">Reset</button>
+  <button id="home"> <a href="{{ url_for('home') }}">Home</a></button>
+</div>
+{% endblock %}
+</body>
+</html>
